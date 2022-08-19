@@ -131,7 +131,6 @@ def submit(request, course_id):
 # <HINT> A example method to collect the selected choices
 # from the exam form from the request object
 
-
 def extract_answers(request):
     submitted_anwsers = []
     for key in request.POST:
