@@ -3,8 +3,9 @@ from secrets import choice
 from unittest import suite
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+
 # <HINT> Import any new Models here
-from .models import Course, Enrollment, Question, Choice, Submission, is_get_score
+from .models import Course, Enrollment, Question, Choice, Submission
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -121,9 +122,9 @@ def submit(request, course_id):
     user = request.user
     # get enrollment object
     get_enrollment = Enrollment.objects.get(user=user, course=course)
-    # get_enrollment.save()
-    # Submission.objects.create(enrollment=enrollment)
-    # create submission object by passing enrollment object to enrollment
+    get_enrollment.save()
+    Submission.objects.create(enrollment=enrollment)
+    #create submission object by passing enrollment object to enrollment
     submission = Submission.objects.create(enrollment=get_enrollment)
 
     return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(course_id, submission.id,)))
@@ -171,86 +172,83 @@ def show_exam_result(request, course_id, submission_id):
         return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
 
 
-# def submit(request, course_id):
+def submit(request, course_id):
 
-#     # delete all objects from submission
-#     Submission.objects.all().delete()
+     # delete all objects from submission
+     Submission.objects.all().delete()
 
-#     # get course
-#     course = get_object_or_404(Course, pk=course_id)
-#     print("Course object from get_object_or_404: ", course)
+     # get course
+     course = get_object_or_404(Course, pk=course_id)
+     print("Course object from get_object_or_404: ", course)
 
-#     # get user
-#     user = request.user
-#     print("User from request: ", user)
+     # get user
+     user = request.user
+     print("User from request: ", user)
 
-#     # get enrollment object
-#     get_enrollment = Enrollment.objects.get(user=user, course=course)
-#     print("Enrollment object: ", get_enrollment)
-#     print("Enrollment object ID: ", get_enrollment.id)
+     # get enrollment object
+     get_enrollment = Enrollment.objects.get(user=user, course=course)
+     print("Enrollment object: ", get_enrollment)
+     print("Enrollment object ID: ", get_enrollment.id)
 
-#     # create submission object by passion enrollment abject to enrollment
-#     submission = Submission.objects.create(enrollment=get_enrollment)
-#     print("Submission object: ", submission)
-#     print("Submission object ID: ", submission.id)
-#     #submission = Submission(enrollment=enrollment)
-#     # submission.save()
-#     # Submission.objects.create(enrollment=enrollment)
-#     # Submission.objects.all().delete()
-#     eov = Enrollment.objects.values()
-#     print("Enrollment object values :", eov)
-#     sov = Submission.objects.values()
-#     print("Submission object values :", sov)
-#     cov = Choice.objects.values()
-#     print("Choice objects values: ", cov)
+     # create submission object by passion enrollment abject to enrollment
+     submission = Submission.objects.create(enrollment=get_enrollment)
+     print("Submission object: ", submission)
+     print("Submission object ID: ", submission.id)
+     submission = Submission(enrollment=enrollment)
+     submission.save()
+     Submission.objects.create(enrollment=enrollment)
+     Submission.objects.all().delete()
+     eov = Enrollment.objects.values()
+     print("Enrollment object values :", eov)
+     sov = Submission.objects.values()
+     print("Submission object values :", sov)
+     cov = Choice.objects.values()
+     print("Choice objects values: ", cov)
 
-#     # <HINT> A example method to collect the selected choices from the exam form from the request object
+# <HINT> A example method to collect the selected choices from the exam form from the request object
 
-#     def extract_answers(request):
-#         submitted_anwsers = []
-#         for key in request.POST:
-#             if key.startswith('choice'):
-#                 value = request.POST[key]
-#                 print("Key value from for loop :", value)
-#                 choice_id = int(value)
-#                 print("Choice ID from for loop: ", choice_id)
-#                 # get choice from request
-#                 get_choice = Choice.objects.filter(pk=choice_id)
-#                 print("Get choice object from for loop: ", get_choice)
-#                 # extract submission ID by enrollment ID
-#                 get_submission = Submission.objects.filter(
-#                     enrollment=get_enrollment.id)
-#                 print("Get submission object from for loop: ", get_submission)
-#                 # append choice object to submission ID
-#                 get_submission.chocies.add(get_choice)
-#                 # submission.chocies.add(choice_id)
-#                 get_submission.save()
-#                 submitted_anwsers.append(choice_id)
-#         return submitted_anwsers
+def extract_answers(request):
+    submitted_anwsers = []
+    for key in request.POST:
+        if key.startswith('choice'):
+            value = request.POST[key]
+            print("Key value from for loop :", value)
+            choice_id = int(value)
+            print("Choice ID from for loop: ", choice_id)
+            # get choice from request
+            get_choice = Choice.objects.filter(pk=choice_id)
+            print("Get choice object from for loop: ", get_choice)
+            # extract submission ID by enrollment ID
+            get_submission = Submission.objects.filter(
+            enrollment=get_enrollment.id)
+            print("Get submission object from for loop: ", get_submission)
+            # append choice object to submission ID
+            get_submission.choices.add(get_choice)
+            # submission.choices.add(choice_id)
+            get_submission.save()
+            submitted_anwsers.append(choice_id)
+    return submitted_anwsers
 
-#     su = extract_answers(request)
-#     print("Values form extract answears function", su)
+    su = extract_answers(request)
+    print("Values form extract answears function", su)
 
-#     # Submission.chocies.set(su)
-#     # submission.chocies.add(su)
-#     #submission = Submission(enrollment=enrollment, chocies=su)
-#     # submission.save()
-#     #choices = Submission.objects.get(enrollment=enrollment)
-#     # Submission.objects.get(enrollment=enrollment.id).chocies.add(su)
+    Submission.choices.set(su)
+    submission.choices.add(su)
+    submission = Submission(enrollment=enrollment, choices=su)
+    submission.save()
+    choices = Submission.objects.get(enrollment=enrollment)
+    Submission.objects.get(enrollment=enrollment.id).choices.add(su)
 
-#     ins = Submission.objects.values()
-#     print("Submission objects values: ", ins)
+    ins = Submission.objects.values()
+    print("Submission objects values: ", ins)
 
-#     # for enrollment in Submission.objects.all():
-#     #     enrollment.add(extract_answers(request))
-
-#     #users = Submission.objects.filter(enrollment__in=enrollment)
-
-#     # Submission.objects.create(enrollment=submission,
-#     #                           chocies.set(extract_answers(request)))
-#     # Submission.save()
-
-#     return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(submission.id,)))
+    for enrollment in Submission.objects.all():
+        enrollment.add(extract_answers(request))
+        users = Submission.objects.filter(enrollment__in=enrollment)
+        #Submission.objects.create(enrollment=submission, choices.set(extract_answers(request)))
+        Submission.objects.create(enrollment=submission, choices=extract_answers(request))
+        Submission.save()
+    return HttpResponseRedirect(reverse(viewname='onlinecourse:exam_result', args=(submission.id,)))
 
 # <HINT> Create an exam result view to check if learner passed exam and show their question results and result for each question,
 # you may implement it based on the following logic:
@@ -260,5 +258,5 @@ def show_exam_result(request, course_id, submission_id):
     # Calculate the total score
 
 
-# def show_exam_result(request, course_id, submission_id):
-#     print("exam result")
+def show_exam_result(request, course_id, submission_id):
+    print("exam result")
